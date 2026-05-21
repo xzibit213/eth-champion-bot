@@ -60,44 +60,60 @@ class SingleStrategyExecutor:
             'bot_start_time': datetime.now().isoformat()
         }
 
-    def load_state(self) -> dict:
-        # 1. Try fetching from remote persistent KV store first (Survives Render sleep)
-        kvdb_url = "https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state"
+    KVDB_URL = "https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state"
+
+    def _kvdb_get(self) -> dict | None:
+        """Fetch state from KVDB. Returns dict or None on failure."""
         try:
-            res = requests.get(kvdb_url, timeout=5)
-            if res.status_code == 200:
-                state = res.json()
+            res = requests.get(self.KVDB_URL, timeout=8)
+            if res.status_code == 200 and res.text.strip():
+                state = json.loads(res.text)
                 logging.info("Successfully loaded persistent state from remote KV store.")
-                
-                # Merge defaults for new keys
-                defaults = self._default_state()
-                for k, v in defaults.items():
-                    if k not in state:
-                        state[k] = v
-                
-                # Sync remote state to local disk just in case
-                with open(self.state_file, 'w') as f:
-                    json.dump(state, f, indent=4)
                 return state
         except Exception as e:
-            logging.error(f"Failed to fetch remote state: {e}. Falling back to local disk.")
-            
+            logging.error(f"KVDB GET failed: {e}")
+        return None
+
+    def _kvdb_put(self, state: dict):
+        """Write state to KVDB using PUT with raw JSON body."""
+        try:
+            data = json.dumps(state)
+            requests.put(
+                self.KVDB_URL,
+                data=data,
+                headers={"Content-Type": "application/json"},
+                timeout=8
+            )
+        except Exception as e:
+            logging.error(f"KVDB PUT failed: {e}")
+
+    def load_state(self) -> dict:
+        # 1. Try remote KV store first (survives Render deploys & sleep)
+        remote = self._kvdb_get()
+        if remote:
+            defaults = self._default_state()
+            for k, v in defaults.items():
+                if k not in remote:
+                    remote[k] = v
+            # Sync to local disk
+            with open(self.state_file, 'w') as f:
+                json.dump(remote, f, indent=4)
+            return remote
+
         # 2. Fallback to local disk
         if os.path.exists(self.state_file):
             try:
                 with open(self.state_file, 'r') as f:
                     state = json.load(f)
                     logging.info(f"Loaded existing bot state from {self.state_file}")
-                    
                     defaults = self._default_state()
                     for k, v in defaults.items():
                         if k not in state:
                             state[k] = v
-                        
                     return state
             except Exception as e:
                 logging.error(f"Error loading state file: {e}. Reinitializing state.")
-                
+
         default_state = self._default_state()
         self.save_state(default_state)
         logging.info("Initialized fresh state.json")
@@ -110,13 +126,9 @@ class SingleStrategyExecutor:
                 json.dump(state, f, indent=4)
         except Exception as e:
             logging.error(f"Failed to write state to disk: {e}")
-            
-        # Sync to remote persistent KV store to survive Render sleep
-        try:
-            kvdb_url = "https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state"
-            threading.Thread(target=lambda: requests.post(kvdb_url, json=state, timeout=5), daemon=True).start()
-        except Exception as e:
-            logging.error(f"Failed to sync state to remote KV store: {e}")
+
+        # Sync to remote KVDB (fire-and-forget in background thread)
+        threading.Thread(target=self._kvdb_put, args=(state.copy(),), daemon=True).start()
 
     def log_trade_to_google(self, event_type: str, trade_info: dict):
         """Sends trade data in a non-blocking background thread to user's Google App Script webhook."""

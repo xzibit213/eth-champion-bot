@@ -284,12 +284,28 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
             }
             ledger_url = os.environ.get('GOOGLE_DOC_URL') or "https://docs.google.com"
             
+            loaded_from_disk = False
             if os.path.exists('state.json'):
                 try:
                     with open('state.json', 'r') as f:
                         loaded = json.load(f)
                         state.update(loaded)
                         ledger_url = os.environ.get('GOOGLE_DOC_URL') or state.get('google_doc_url', ledger_url)
+                        loaded_from_disk = True
+                except:
+                    pass
+
+            # If local state looks like a fresh default, try KVDB as backup
+            if not loaded_from_disk or state.get('total_trades', 0) == 0:
+                try:
+                    import requests as req
+                    kvdb_r = req.get("https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state", timeout=5)
+                    if kvdb_r.status_code == 200 and kvdb_r.text.strip():
+                        remote = json.loads(kvdb_r.text)
+                        # Only use remote if it has more data than local
+                        if remote.get('total_trades', 0) >= state.get('total_trades', 0):
+                            state.update(remote)
+                            ledger_url = os.environ.get('GOOGLE_DOC_URL') or state.get('google_doc_url', ledger_url)
                 except:
                     pass
 
@@ -371,6 +387,18 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
                 html = html.replace(key, val)
             
             self.wfile.write(html.encode('utf-8'))
+        elif self.path == '/api/state':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            state = {}
+            if os.path.exists('state.json'):
+                try:
+                    with open('state.json', 'r') as f:
+                        state = json.load(f)
+                except:
+                    pass
+            self.wfile.write(json.dumps(state, indent=2).encode('utf-8'))
         else:
             self.send_response(404)
             self.end_headers()
