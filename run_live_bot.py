@@ -13,406 +13,366 @@ DASHBOARD_HTML = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="30">
-    <title>ETH Champion | Live Trading Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>ETH Champion | Vanguard Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #05040a;
-            --bg-card: rgba(18, 16, 32, 0.65);
-            --border-glass: rgba(255,255,255,0.08);
-            --accent-purple: #a78bfa;
+            --bg-deep: #050505;
+            --bg-shell: rgba(255, 255, 255, 0.02);
+            --bg-core: rgba(12, 12, 12, 0.7);
+            --border-shell: rgba(255, 255, 255, 0.03);
+            --border-core: rgba(255, 255, 255, 0.06);
+            --accent-purple: #9f7aea;
             --accent-blue: #60a5fa;
             --accent-green: #34d399;
             --accent-red: #f87171;
-            --accent-amber: #fbbf24;
-            --text-1: #f8fafc;
-            --text-2: #cbd5e1;
-            --text-3: #64748b;
+            --text-1: #ffffff;
+            --text-2: #a1a1aa;
+            --text-3: #52525b;
+            --bezier: cubic-bezier(0.32, 0.72, 0, 1);
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             background: var(--bg-deep);
             color: var(--text-1);
-            min-height: 100vh;
+            min-height: 100dvh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Animated gradient orbs */
+        /* Ethereal Glass Orbs */
         .bg-orb {
-            position: fixed; border-radius: 50%; filter: blur(140px); opacity: 0.15; pointer-events: none; z-index: 0;
+            position: fixed; border-radius: 50%; filter: blur(160px); opacity: 0.12; pointer-events: none; z-index: 0;
+            will-change: transform;
         }
-        .orb-1 { width: 700px; height: 700px; background: #7c3aed; top: -200px; left: -150px; animation: float1 22s ease-in-out infinite; }
-        .orb-2 { width: 600px; height: 600px; background: #2563eb; bottom: -150px; right: -100px; animation: float2 28s ease-in-out infinite; }
-        .orb-3 { width: 500px; height: 500px; background: #059669; top: 60%; left: 40%; transform: translate(-50%, -50%); animation: float3 20s ease-in-out infinite; }
-        @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(100px,80px); } }
-        @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-80px,-100px); } }
-        @keyframes float3 { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-30%,-60%) scale(1.2); } }
+        .orb-1 { width: 800px; height: 800px; background: #9f7aea; top: -200px; left: -200px; animation: float1 30s ease-in-out infinite; }
+        .orb-2 { width: 700px; height: 700px; background: #10b981; bottom: -200px; right: -200px; animation: float2 40s ease-in-out infinite; }
+        @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(100px,100px); } }
+        @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-100px,-100px); } }
 
-        .app { max-width: 1400px; margin: 0 auto; padding: 24px 24px 40px; position: relative; z-index: 1; }
+        .app-container {
+            max-width: 1440px; margin: 0 auto; padding: 48px 24px 80px; position: relative; z-index: 1;
+        }
 
-        /* Top bar */
+        /* Top Bar */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 32px; padding: 0 8px;
+            margin-bottom: 64px; padding: 0 16px;
         }
-        .brand { display: flex; align-items: center; gap: 14px; }
+        .brand { display: flex; align-items: center; gap: 16px; }
         .brand-icon {
-            width: 48px; height: 48px; border-radius: 16px;
-            background: linear-gradient(135deg, #7c3aed, #2563eb);
-            display: grid; place-items: center; font-size: 24px; font-weight: 900; color: #fff;
-            box-shadow: 0 0 24px rgba(124, 58, 237, 0.4);
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            display: grid; place-items: center; font-size: 20px; color: #fff;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.2);
         }
-        .brand-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-        .brand-text span { color: var(--text-3); font-weight: 500; font-size: 14px; margin-left: 8px; }
+        .brand-text { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .brand-text span { color: var(--text-3); font-weight: 500; font-size: 14px; margin-left: 12px; letter-spacing: 0; }
 
         .live-chip {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.25);
-            padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 700;
-            color: var(--accent-green); text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(52,211,153,0.15);
+            padding: 8px 16px; border-radius: 999px; font-size: 11px; font-weight: 700;
+            color: var(--text-2); text-transform: uppercase; letter-spacing: 1.5px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
         }
-        .live-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; animation: blink 1.5s infinite; }
-        @keyframes blink { 0%,100% { opacity: .4; } 50% { opacity: 1; box-shadow: 0 0 8px var(--accent-green); } }
+        .live-dot { width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); }
 
-        /* Main Layout Grid */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 24px;
-            align-items: start;
+        /* DOUBLE-BEZEL COMPONENT (Doppelrand) */
+        .double-bezel {
+            background: var(--bg-shell);
+            border: 1px solid var(--border-shell);
+            border-radius: 2rem;
+            padding: 6px;
         }
-
-        /* Glass Panel Base */
-        .glass-panel {
-            background: var(--bg-card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border-glass); border-radius: 24px;
+        .db-inner {
+            background: var(--bg-core);
+            border: 1px solid var(--border-core);
+            border-radius: calc(2rem - 6px);
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.05);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            height: 100%;
             overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
 
-        /* Chart Area */
-        .chart-container {
-            height: calc(100vh - 120px);
-            min-height: 800px;
-            display: flex; flex-direction: column;
+        /* Layout Archetype: The Asymmetrical Bento */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
         }
-        .chart-header {
-            padding: 20px 24px; border-bottom: 1px solid var(--border-glass);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0,0,0,0.2);
+        .col-span-8 { grid-column: span 8; }
+        .col-span-4 { grid-column: span 4; }
+        .col-span-12 { grid-column: span 12; }
+
+        /* Typography Tags */
+        .eyebrow {
+            display: inline-block; padding: 4px 12px; border-radius: 999px;
+            font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 600;
+            background: rgba(255,255,255,0.05); color: var(--text-2); margin-bottom: 16px;
         }
-        .ch-title { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
-        .ch-price { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: var(--text-1); }
-        .ch-range { font-size: 13px; color: var(--text-3); font-weight: 500; }
-        .tv-wrapper { flex: 1; width: 100%; }
 
-        /* Right Sidebar */
-        .sidebar { display: flex; flex-direction: column; gap: 24px; }
+        /* Chart Header */
+        .chart-header { padding: 32px 32px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .ch-price { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; letter-spacing: -1px; }
+        .ch-range { display: block; font-size: 14px; color: var(--text-3); font-weight: 500; font-family: 'Plus Jakarta Sans'; letter-spacing: 0; margin-top: 4px; }
+        .tv-wrapper { height: 600px; width: 100%; margin-top: 16px; }
 
-        /* Stats Grid (2x2) */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        /* Stats Grid Inside Bento */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 24px; height: 100%; align-content: space-between;}
         .stat-card {
-            background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-            border-radius: 20px; padding: 20px;
-            border: 1px solid var(--border-glass);
-            transition: transform 0.2s, background 0.3s;
-            position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.02); border-radius: 1.5rem; padding: 24px;
+            border: 1px solid rgba(255,255,255,0.03); transition: all 0.5s var(--bezier);
         }
-        .stat-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--card-color, var(--accent-blue)); opacity: 0.5;
-        }
-        .st-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); margin-bottom: 8px; font-weight: 700; }
-        .st-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        .stat-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.04); }
+        .st-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); margin-bottom: 12px; font-weight: 700; }
+        .st-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; letter-spacing: -1px; }
         
-        .c-green { color: var(--accent-green); --card-color: var(--accent-green); }
-        .c-red { color: var(--accent-red); --card-color: var(--accent-red); }
-        .c-purple { color: var(--accent-purple); --card-color: var(--accent-purple); }
-        .c-blue { color: var(--accent-blue); --card-color: var(--accent-blue); }
-
-        /* Panel Headers */
-        .panel-hdr {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 20px 24px 16px; border-bottom: 1px solid var(--border-glass);
-        }
-        .panel-hdr h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-2); font-weight: 800; }
+        .c-green { color: var(--accent-green); }
+        .c-red { color: var(--accent-red); }
+        .c-purple { color: var(--accent-purple); }
 
         /* Active Position */
-        .pos-panel { padding: 0; }
-        .pos-content { padding: 24px; }
-        .dir-badge { padding: 6px 16px; border-radius: 100px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .dir-long { background: rgba(52,211,153,0.15); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.3); box-shadow: 0 0 15px rgba(52,211,153,0.1); }
-        .dir-short { background: rgba(248,113,113,0.15); color: var(--accent-red); border: 1px solid rgba(248,113,113,0.3); box-shadow: 0 0 15px rgba(248,113,113,0.1); }
+        .pos-panel { padding: 32px; }
+        .pos-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+        .dir-badge {
+            padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .dir-long { background: rgba(52,211,153,0.1); color: var(--accent-green); }
+        .dir-short { background: rgba(248,113,113,0.1); color: var(--accent-red); }
         
-        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;}
-        .pos-grid.three { grid-template-columns: 1fr 1fr 1fr; margin-bottom: 0;}
-        .pos-cell { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.03); }
-        .pos-cell .pc-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); margin-bottom: 6px; font-weight: 600;}
-        .pos-cell .pc-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; }
-        
-        .no-pos { text-align: center; padding: 40px 0; color: var(--text-3); font-size: 15px; font-style: italic; }
-        .no-pos .scan-icon { font-size: 40px; margin-bottom: 12px; display: block; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
+        .pos-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .pos-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); font-weight: 600; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .pos-table td { padding: 24px 0 0 0; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; }
+        .no-pos { text-align: center; padding: 40px 0; color: var(--text-3); font-size: 14px; letter-spacing: 0.5px;}
 
-        /* ROI Slider */
-        .roi-panel { padding: 0; }
-        .roi-content { padding: 24px; }
-        .slider-container { margin-bottom: 24px; }
-        .slider-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
-        .slider-label { font-size: 13px; color: var(--text-2); font-weight: 600; }
-        .slider-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--accent-purple); }
-        
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0;
+        /* Nested CTA Button Architecture */
+        .cta-container { display: flex; flex-direction: column; gap: 16px; padding: 24px; }
+        .cta-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            padding: 8px 8px 8px 24px; border-radius: 999px; text-decoration: none; color: var(--text-1);
+            font-size: 14px; font-weight: 600; transition: all 0.6s var(--bezier);
+            cursor: pointer;
         }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 8px; cursor: pointer;
-            background: rgba(255,255,255,0.1); border-radius: 10px;
+        .cta-icon-wrapper {
+            width: 40px; height: 40px; border-radius: 999px;
+            background: rgba(255,255,255,0.1); display: grid; place-items: center;
+            transition: all 0.6s var(--bezier);
         }
-        input[type=range]::-webkit-slider-thumb {
-            height: 24px; width: 24px; border-radius: 50%;
-            background: var(--accent-purple); cursor: pointer;
-            -webkit-appearance: none; margin-top: -8px;
-            box-shadow: 0 0 15px var(--accent-purple);
-            border: 3px solid #fff;
-        }
-        
-        .roi-results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .roi-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03); }
-        .roi-box .rb-month { font-size: 11px; color: var(--text-3); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-        .roi-box .rb-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--accent-green); }
+        .cta-btn:active { transform: scale(0.98); }
+        .cta-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+        .cta-btn:hover .cta-icon-wrapper { background: #fff; color: #000; transform: scale(1.05) translate(2px, -2px); }
 
         /* Trade History */
-        .history-panel { padding: 0; max-height: 400px; display: flex; flex-direction: column; }
-        .history-content { overflow-y: auto; padding: 0 12px; }
-        .history-content::-webkit-scrollbar { width: 6px; }
+        .history-panel { padding: 32px; max-height: 400px; display: flex; flex-direction: column; }
+        .history-content { overflow-y: auto; margin-top: 16px; padding-right: 16px;}
+        .history-content::-webkit-scrollbar { width: 4px; }
         .history-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         
-        .history-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .history-tbl th {
-            text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-3); padding: 16px 12px 12px; font-weight: 700;
-            position: sticky; top: 0; background: var(--bg-card); backdrop-filter: blur(10px); z-index: 2;
-        }
-        .history-tbl td { padding: 12px; border-top: 1px solid rgba(255,255,255,0.04); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;}
-        .history-tbl tr:hover td { background: rgba(255,255,255,0.03); }
-        .pnl-pos { color: var(--accent-green); font-weight: 800; }
-        .pnl-neg { color: var(--accent-red); font-weight: 800; }
-        .res-tp { background: rgba(52,211,153,0.15); color: var(--accent-green); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-        .res-sl { background: rgba(248,113,113,0.15); color: var(--accent-red); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .history-tbl { width: 100%; border-collapse: collapse; }
+        .history-tbl th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); padding-bottom: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .history-tbl td { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.02); font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-2); }
+        .pnl-pos { color: var(--accent-green); }
+        .pnl-neg { color: var(--accent-red); }
 
-        /* CTA buttons */
-        .cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: auto; }
-        .cta-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 16px; border-radius: 16px; text-decoration: none;
-            font-size: 14px; font-weight: 700; transition: all 0.25s;
-            border: 1px solid var(--border-glass);
+        /* ROI Slider (Minimalist) */
+        .roi-panel { padding: 32px; }
+        .slider-header { display: flex; justify-content: space-between; margin-bottom: 24px; align-items: baseline;}
+        .slider-value { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; color: #fff; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 24px 0; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: rgba(255,255,255,0.1); }
+        input[type=range]::-webkit-slider-thumb {
+            height: 16px; width: 16px; border-radius: 50%; background: #fff; cursor: pointer;
+            -webkit-appearance: none; margin-top: -7px; transition: transform 0.3s var(--bezier);
         }
-        .cta-primary { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; box-shadow: 0 4px 20px rgba(124,58,237,0.3); border: none; }
-        .cta-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); filter: brightness(1.1); }
-        .cta-secondary { background: rgba(0,0,0,0.4); color: var(--text-2); }
-        .cta-secondary:hover { border-color: rgba(167,139,250,0.4); color: #fff; background: rgba(167,139,250,0.1); }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.5); }
+        .roi-results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;}
+        .roi-box { padding: 16px 0; border-top: 1px solid rgba(255,255,255,0.05); }
+        .roi-box .rb-month { font-size: 11px; color: var(--text-3); text-transform: uppercase; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
+        .roi-box .rb-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 500; }
 
+        /* Mobile Collapse */
         @media (max-width: 1024px) {
-            .main-grid { grid-template-columns: 1fr; }
-            .chart-container { height: 600px; min-height: unset; }
-        }
-        @media (max-width: 640px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .pos-grid, .pos-grid.three, .roi-results { grid-template-columns: 1fr; }
-            .cta-row { grid-template-columns: 1fr; }
-            .chart-container { height: 450px; }
+            .col-span-8, .col-span-4 { grid-column: span 12; }
+            .bento-grid { gap: 16px; margin-bottom: 16px; }
+            .app-container { padding: 24px 16px 40px; }
+            .chart-header { padding: 24px 24px 0; }
+            .tv-wrapper { height: 450px; }
+            .pos-table th, .pos-table td { padding: 12px 8px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
     <div class="bg-orb orb-1"></div>
     <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
 
-    <div class="app">
-        <!-- Top Bar -->
+    <div class="app-container">
         <div class="top-bar">
             <div class="brand">
-                <div class="brand-icon">&#926;</div>
-                <div class="brand-text">ETH Champion<span>v2.0 Premium</span></div>
+                <div class="brand-icon">&#8960;</div>
+                <div class="brand-text">ETH Champion<span>Vanguard Build</span></div>
             </div>
-            <div class="live-chip"><div class="live-dot"></div>Bot Online</div>
+            <div class="live-chip"><div class="live-dot"></div>Online</div>
         </div>
 
-        <div class="main-grid">
-            <!-- Left: TradingView Chart -->
-            <div class="glass-panel chart-container">
-                <div class="chart-header">
-                    <div class="ch-title">&#128200; ETH/USDT Analysis <span style="font-size: 11px; font-weight: 500; color: var(--text-3); background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; margin-left: 8px;">BINANCE SPOT &bull; 15M</span></div>
-                    <div class="ch-price">${last_price} <span class="ch-range">Range: ${last_range}</span></div>
-                </div>
-                <div class="tv-wrapper">
-                    <div class="tradingview-widget-container" style="height: 100%; width: 100%">
-                        <div id="tradingview_12345" style="height: 100%; width: 100%"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-                        <script type="text/javascript">
-                        new TradingView.widget(
-                        {
-                            "autosize": true,
-                            "symbol": "BINANCE:ETHUSDT",
-                            "interval": "15",
-                            "timezone": "Etc/UTC",
-                            "theme": "dark",
-                            "style": "1",
-                            "locale": "en",
-                            "enable_publishing": false,
-                            "backgroundColor": "rgba(0,0,0,0)",
-                            "gridColor": "rgba(255,255,255,0.04)",
-                            "hide_top_toolbar": false,
-                            "hide_legend": false,
-                            "save_image": false,
-                            "studies": [
-                                "MAExp@tv-basicstudies",
-                                "Volume@tv-basicstudies"
-                            ],
-                            "container_id": "tradingview_12345"
-                        }
-                        );
-                        </script>
+        <!-- Row 1: Chart & Core Stats -->
+        <div class="bento-grid">
+            <!-- Main Chart -->
+            <div class="col-span-8 double-bezel">
+                <div class="db-inner">
+                    <div class="chart-header">
+                        <div>
+                            <span class="eyebrow">Market Data &bull; 15M</span>
+                            <div class="ch-price">${last_price}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="eyebrow" style="background: transparent; margin:0;">24H Range</span>
+                            <span class="ch-range">${last_range}</span>
+                        </div>
+                    </div>
+                    <div class="tv-wrapper">
+                        <div class="tradingview-widget-container" style="height: 100%; width: 100%">
+                            <div id="tradingview_12345" style="height: 100%; width: 100%"></div>
+                            <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                            <script type="text/javascript">
+                            new TradingView.widget(
+                            {
+                                "autosize": true,
+                                "symbol": "BINANCE:ETHUSDT",
+                                "interval": "15",
+                                "timezone": "Etc/UTC",
+                                "theme": "dark",
+                                "style": "1",
+                                "locale": "en",
+                                "enable_publishing": false,
+                                "backgroundColor": "rgba(0,0,0,0)",
+                                "gridColor": "rgba(255,255,255,0.02)",
+                                "hide_top_toolbar": true,
+                                "hide_legend": true,
+                                "save_image": false,
+                                "studies": ["MAExp@tv-basicstudies", "Volume@tv-basicstudies"],
+                                "container_id": "tradingview_12345"
+                            }
+                            );
+                            </script>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Sidebar Data -->
-            <div class="sidebar">
-                <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card c-green">
-                        <div class="st-label">Wallet</div>
-                        <div class="st-value">${wallet_balance}</div>
-                    </div>
-                    <div class="stat-card {pnl_color}">
-                        <div class="st-label">Total PnL</div>
-                        <div class="st-value">{total_pnl}%</div>
-                    </div>
-                    <div class="stat-card c-purple">
-                        <div class="st-label">Win Rate</div>
-                        <div class="st-value">{win_rate}%</div>
-                    </div>
-                    <div class="stat-card c-blue">
-                        <div class="st-label">Total Trades</div>
-                        <div class="st-value">{total_trades}</div>
-                    </div>
-                </div>
-
-
-                <!-- Google Sheets Banner -->
-                <a href="{ledger_url}" target="_blank" class="glass-panel" style="display: block; padding: 16px 20px; text-decoration: none; border: 1px solid rgba(52, 211, 153, 0.3); background: linear-gradient(90deg, rgba(52, 211, 153, 0.05), transparent); position: relative; overflow: hidden; transition: all 0.3s;">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="font-size: 12px; font-weight: 700; color: var(--accent-green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Live Trade Ledger</div>
-                            <div style="font-size: 14px; color: var(--text-1); font-weight: 500;">Check all live bot trades on Google Sheets &rarr;</div>
+            <!-- Stats -->
+            <div class="col-span-4 double-bezel">
+                <div class="db-inner">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="st-label">Wallet</div>
+                            <div class="st-value">${wallet_balance}</div>
                         </div>
-                        <div style="font-size: 28px;">&#128202;</div>
-                    </div>
-                </a>
-
-                <!-- ROI Projection Tool -->
-                <div class="glass-panel roi-panel">
-                    <div class="panel-hdr">
-                        <h2>ROI Projection Tool</h2>
-                        <span style="font-size: 11px; color: var(--text-3); font-weight: 600;">COMPOUNDING</span>
-                    </div>
-                    <div class="roi-content">
-                        <div class="slider-container">
-                            <div class="slider-header">
-                                <span class="slider-label">Expected Monthly Yield</span>
-                                <span class="slider-value" id="yield-val">10%</span>
-                            </div>
-                            <input type="range" id="yield-slider" min="1" max="30" value="10">
+                        <div class="stat-card">
+                            <div class="st-label">Total PnL</div>
+                            <div class="st-value {pnl_color}">{total_pnl}%</div>
                         </div>
-                        <div class="roi-results">
-                            <div class="roi-box">
-                                <div class="rb-month">1 Month</div>
-                                <div class="rb-val" id="roi-1m">--</div>
-                            </div>
-                            <div class="roi-box">
-                                <div class="rb-month">3 Months</div>
-                                <div class="rb-val" id="roi-3m">--</div>
-                            </div>
-                            <div class="roi-box">
-                                <div class="rb-month">6 Months</div>
-                                <div class="rb-val" id="roi-6m">--</div>
-                            </div>
-                            <div class="roi-box">
-                                <div class="rb-month">1 Year</div>
-                                <div class="rb-val" id="roi-12m">--</div>
-                            </div>
+                        <div class="stat-card">
+                            <div class="st-label">Win Rate</div>
+                            <div class="st-value c-purple">{win_rate}%</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="st-label">Trades</div>
+                            <div class="st-value">{total_trades}</div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Trade History -->
-                <div class="glass-panel history-panel">
-                    <div class="panel-hdr">
-                        <h2>Recent Trade Log</h2>
-                        <span style="font-size: 11px; color: var(--text-3); font-weight: 700;">{wins}W / {losses}L</span>
+        <!-- Row 2: Active Position Full Width -->
+        <div class="bento-grid">
+            <div class="col-span-12 double-bezel">
+                <div class="db-inner pos-panel">
+                    <div class="pos-header">
+                        <span class="eyebrow" style="margin:0;">Active Position</span>
+                        {dir_badge_html}
                     </div>
+                    <div style="overflow-x: auto;">
+                        {active_position_html}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: History, ROI, Actions -->
+        <div class="bento-grid">
+            <!-- History -->
+            <div class="col-span-4 double-bezel">
+                <div class="db-inner history-panel">
+                    <span class="eyebrow">Recent Trade Log</span>
                     <div class="history-content">
                         {trade_history_html}
                     </div>
                 </div>
+            </div>
 
-                <!-- CTA Buttons -->
-                <div class="cta-row">
-                    <a class="cta-btn cta-primary" href="{ledger_url}" target="_blank">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Google Sheets Ledger
+            <!-- ROI Tool -->
+            <div class="col-span-4 double-bezel">
+                <div class="db-inner roi-panel">
+                    <span class="eyebrow">ROI Projection Tool</span>
+                    <div class="slider-header">
+                        <span style="font-size: 13px; color: var(--text-2); font-weight: 500;">Expected Monthly Yield</span>
+                        <span class="slider-value" id="yield-val">10%</span>
+                    </div>
+                    <input type="range" id="yield-slider" min="1" max="30" value="10">
+                    <div class="roi-results">
+                        <div class="roi-box">
+                            <div class="rb-month">1 Month</div>
+                            <div class="rb-val" id="roi-1m">--</div>
+                        </div>
+                        <div class="roi-box">
+                            <div class="rb-month">3 Months</div>
+                            <div class="rb-val" id="roi-3m">--</div>
+                        </div>
+                        <div class="roi-box">
+                            <div class="rb-month">6 Months</div>
+                            <div class="rb-val" id="roi-6m">--</div>
+                        </div>
+                        <div class="roi-box">
+                            <div class="rb-month">1 Year</div>
+                            <div class="rb-val" id="roi-12m">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTAs -->
+            <div class="col-span-4 double-bezel">
+                <div class="db-inner cta-container" style="justify-content: center;">
+                    <span class="eyebrow" style="margin-bottom: 24px;">External Links</span>
+                    <a href="{ledger_url}" target="_blank" class="cta-btn">
+                        <span>Google Sheets Ledger</span>
+                        <div class="cta-icon-wrapper">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                        </div>
                     </a>
-                    <a class="cta-btn cta-secondary" href="https://dashboard.render.com/web/srv-d85g27svikkc739sjrtg" target="_blank">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        Render Console
+                    <a href="https://dashboard.render.com/web/srv-d85g27svikkc739sjrtg" target="_blank" class="cta-btn">
+                        <span>Render Console</span>
+                        <div class="cta-icon-wrapper">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                        </div>
                     </a>
                 </div>
             </div>
         </div>
-        
-        <!-- Active Position (Binance Style) -->
-        <div class="glass-panel" style="margin-top: 16px;">
-            <div class="panel-hdr" style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.04);">
-                <h2 style="font-size: 16px; margin: 0; display: flex; align-items: center; gap: 12px;">Active Position {dir_badge_html}</h2>
-            </div>
-            <div style="overflow-x: auto;">
-                {active_position_html}
-            </div>
-        </div>
-        
-        <!-- Bottom Description Panel -->
-        <div class="glass-panel" style="margin-top: 16px; padding: 32px;">
-            <h2 style="font-size: 18px; color: var(--accent-purple); margin-bottom: 24px;">About ETH Champion Engine</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-                <div>
-                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Core Capabilities</h3>
-                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">A fully autonomous, zero-permission trading engine designed to scan ETH/USDT on the 15-minute timeframe for volatility breakouts. Features a 9/20 EMA Pullback trigger and trailing Take-Profit/Stop-Loss management built purely in Python.</p>
-                </div>
-                <div>
-                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Performance & Backtesting</h3>
-                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">Backtested over 6 months of historical Binance data, the strategy maintains a fixed 1:3 Risk/Reward ratio. While win-rate hovers around 30-35%, the asymmetric payoff mathematically yields an upward sloping equity curve.</p>
-                </div>
-                <div>
-                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Technology Stack</h3>
-                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">Built by Antigravity AI, utilizing the CCXT library for exchange execution, JSONBlob for cloud state persistence, and Google Apps Script webhooks for real-time ledger accounting.</p>
-                </div>
-            </div>
-        </div>
+
     </div>
     
     <!-- Client-side ROI Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const currentWallet = {wallet_balance_raw}; // Injected from python
+            const currentWallet = {wallet_balance_raw};
             const slider = document.getElementById('yield-slider');
             const yieldVal = document.getElementById('yield-val');
             
@@ -422,16 +382,12 @@ DASHBOARD_HTML = """
             const r12m = document.getElementById('roi-12m');
 
             const formatter = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0
             });
 
             function updateProjections() {
                 const rate = parseFloat(slider.value) / 100;
                 yieldVal.textContent = slider.value + '%';
-                
                 r1m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 1));
                 r3m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 3));
                 r6m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 6));
@@ -440,6 +396,23 @@ DASHBOARD_HTML = """
 
             slider.addEventListener('input', updateProjections);
             updateProjections(); // Init
+            
+            // Subtle scroll reveal
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.double-bezel').forEach((el, i) => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = `all 0.8s cubic-bezier(0.32, 0.72, 0, 1) ${i * 0.1}s`;
+                observer.observe(el);
+            });
         });
     </script>
 </body>
