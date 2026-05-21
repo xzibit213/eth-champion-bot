@@ -239,8 +239,8 @@ DASHBOARD_HTML = """
                             <div class="ch-price">${last_price}</div>
                         </div>
                         <div style="text-align: right;">
-                            <span class="eyebrow" style="background: transparent; margin:0;">24H Range</span>
-                            <span class="ch-range">${last_range}</span>
+                            <span class="eyebrow" style="background: transparent; margin:0; color: var(--accent-purple);">15M Candle Volatility</span>
+                            <span class="ch-range" style="font-size: 18px; font-weight: 700; color: #fff;">${last_range}</span>
                         </div>
                     </div>
                     <div class="tv-wrapper">
