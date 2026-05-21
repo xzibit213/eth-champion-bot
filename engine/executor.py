@@ -330,6 +330,16 @@ class SingleStrategyExecutor:
             enter_short = last_closed_candle['enter_short'] == 1
             
             if enter_long or enter_short:
+                # STALENESS CHECK: Prevent late entry if server woke up late
+                candle_open_time = last_closed_candle.name
+                candle_close_time = candle_open_time + timedelta(minutes=15)
+                current_time = datetime.utcnow()
+                
+                # If current time is more than 60 seconds past the candle close, it's a stale signal
+                if (current_time - candle_close_time).total_seconds() > 60:
+                    logging.warning(f"Skipping stale signal! Candle closed at {candle_close_time} UTC, current time is {current_time.strftime('%Y-%m-%d %H:%M:%S')} UTC.")
+                    return
+
                 direction = 'Long' if enter_long else 'Short'
                 entry_price = current_price
                 sl_price = last_closed_candle['low'] if enter_long else last_closed_candle['high']

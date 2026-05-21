@@ -307,16 +307,6 @@ DASHBOARD_HTML = """
                     </div>
                 </div>
 
-                <!-- Active Position Panel -->
-                <div class="glass-panel pos-panel">
-                    <div class="panel-hdr">
-                        <h2>Active Position</h2>
-                        {dir_badge_html}
-                    </div>
-                    <div class="pos-content">
-                        {active_position_html}
-                    </div>
-                </div>
 
                 <!-- Google Sheets Banner -->
                 <a href="{ledger_url}" target="_blank" class="glass-panel" style="display: block; padding: 16px 20px; text-decoration: none; border: 1px solid rgba(52, 211, 153, 0.3); background: linear-gradient(90deg, rgba(52, 211, 153, 0.05), transparent); position: relative; overflow: hidden; transition: all 0.3s;">
@@ -386,6 +376,16 @@ DASHBOARD_HTML = """
                         Render Console
                     </a>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Active Position (Binance Style) -->
+        <div class="glass-panel" style="margin-top: 16px;">
+            <div class="panel-hdr" style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                <h2 style="font-size: 16px; margin: 0; display: flex; align-items: center; gap: 12px;">Active Position {dir_badge_html}</h2>
+            </div>
+            <div style="overflow-x: auto;">
+                {active_position_html}
             </div>
         </div>
         
@@ -519,20 +519,37 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
             if active_trade:
                 d = active_trade['direction']
                 dir_cls = "dir-long" if d == 'Long' else "dir-short"
-                dir_badge = f'<span class="dir-badge {dir_cls}">{d.upper()}</span>'
+                dir_badge = f'<span class="dir-badge {dir_cls}" style="margin:0; font-size:10px;">{d.upper()}</span>'
                 
                 margin = balance * 0.10
                 size = margin / active_trade["entry_price"]
                 
-                pos_html = f'''<div class="pos-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div class="pos-cell"><div class="pc-label">Entry Price</div><div class="pc-val" style="color:var(--text-1)">${active_trade["entry_price"]:.2f}</div></div>
-                    <div class="pos-cell"><div class="pc-label">Margin Used</div><div class="pc-val" style="color:var(--text-1)">${margin:.2f} <span style="font-size:11px;color:var(--text-3)">({size:.4f} ETH)</span></div></div>
-                    <div class="pos-cell"><div class="pc-label">Stop Loss</div><div class="pc-val" style="color:var(--accent-red)">${active_trade["sl_price"]:.2f}</div></div>
-                    <div class="pos-cell"><div class="pc-label">Take Profit</div><div class="pc-val" style="color:var(--accent-green)">${active_trade["tp_price"]:.2f}</div></div>
-                </div>'''
+                if d == 'Long':
+                    unrealized_pnl = ((last_price - active_trade["entry_price"]) / active_trade["entry_price"]) * 100
+                else:
+                    unrealized_pnl = ((active_trade["entry_price"] - last_price) / active_trade["entry_price"]) * 100
+                    
+                upnl_cls = "pnl-pos" if unrealized_pnl >= 0 else "pnl-neg"
+                upnl_sign = "+" if unrealized_pnl >= 0 else ""
+                
+                pos_html = f'''<table class="history-tbl" style="margin: 0; min-width: 800px;">
+                    <thead><tr><th>Symbol</th><th>Size</th><th>Entry Price</th><th>Mark Price</th><th>Margin</th><th>Stop Loss</th><th>Take Profit</th><th>Unrealized PnL</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ETH/USDT</strong></td>
+                            <td>{size:.4f} ETH</td>
+                            <td>${active_trade["entry_price"]:.2f}</td>
+                            <td>${last_price:.2f}</td>
+                            <td>${margin:.2f}</td>
+                            <td style="color:var(--accent-red)">${active_trade["sl_price"]:.2f}</td>
+                            <td style="color:var(--accent-green)">${active_trade["tp_price"]:.2f}</td>
+                            <td class="{upnl_cls}">{upnl_sign}{unrealized_pnl:.2f}%</td>
+                        </tr>
+                    </tbody>
+                </table>'''
             else:
                 dir_badge = '<span style="font-size:11px;color:var(--text-3);">IDLE</span>'
-                pos_html = '<div class="no-pos"><span class="scan-icon">&#128225;</span>Scanning for breakout signals...</div>'
+                pos_html = '<div class="no-pos" style="padding: 32px; text-align: center;"><span class="scan-icon" style="margin-right:8px;">&#128225;</span>Scanning for breakout signals...</div>'
 
             # Trade history table
             history = state.get('trade_history', [])
