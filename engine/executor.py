@@ -167,8 +167,8 @@ class SingleStrategyExecutor:
         minutes_to_add = 15 - (now.minute % 15)
         next_candle_time = now.replace(second=0, microsecond=0) + timedelta(minutes=minutes_to_add)
         
-        # Extra 1 second safety delay to ensure CCXT/Binance has closed the candle on server
-        next_candle_time += timedelta(seconds=1)
+        # Extra 0.3 second safety delay to ensure CCXT/Binance has closed the candle on server
+        next_candle_time += timedelta(seconds=0.3)
         
         sleep_seconds = (next_candle_time - now).total_seconds()
         
@@ -335,8 +335,8 @@ class SingleStrategyExecutor:
                 candle_close_time = candle_open_time + timedelta(minutes=15)
                 current_time = datetime.utcnow()
                 
-                # If current time is more than 60 seconds past the candle close, it's a stale signal
-                if (current_time - candle_close_time).total_seconds() > 60:
+                # If current time is more than 15 seconds past the candle close, it's a stale signal
+                if (current_time - candle_close_time).total_seconds() > 15:
                     logging.warning(f"Skipping stale signal! Candle closed at {candle_close_time} UTC, current time is {current_time.strftime('%Y-%m-%d %H:%M:%S')} UTC.")
                     return
 
