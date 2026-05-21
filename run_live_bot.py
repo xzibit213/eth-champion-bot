@@ -274,7 +274,7 @@ DASHBOARD_HTML = """
                             "hide_legend": false,
                             "save_image": false,
                             "studies": [
-                                "BB@tv-basicstudies",
+                                "MAExp@tv-basicstudies",
                                 "Volume@tv-basicstudies"
                             ],
                             "container_id": "tradingview_12345"
@@ -395,7 +395,7 @@ DASHBOARD_HTML = """
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
                 <div>
                     <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Core Capabilities</h3>
-                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">A fully autonomous, zero-permission trading engine designed to scan ETH/USDT on the 15-minute timeframe for volatility breakouts. Features an adaptive Bollinger Band trigger and trailing Take-Profit/Stop-Loss management built purely in Python.</p>
+                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">A fully autonomous, zero-permission trading engine designed to scan ETH/USDT on the 15-minute timeframe for volatility breakouts. Features a 9/20 EMA Pullback trigger and trailing Take-Profit/Stop-Loss management built purely in Python.</p>
                 </div>
                 <div>
                     <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Performance & Backtesting</h3>
