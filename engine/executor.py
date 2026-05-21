@@ -60,36 +60,35 @@ class SingleStrategyExecutor:
             'bot_start_time': datetime.now().isoformat()
         }
 
-    KVDB_URL = "https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state"
+    REMOTE_STATE_URL = "https://jsonblob.com/api/jsonBlob/019e4ab4-ae75-7654-997d-b83abbee7f26"
 
-    def _kvdb_get(self) -> dict | None:
-        """Fetch state from KVDB. Returns dict or None on failure."""
+    def _remote_get(self) -> dict | None:
+        """Fetch state from JSONBlob. Returns dict or None on failure."""
         try:
-            res = requests.get(self.KVDB_URL, timeout=8)
+            res = requests.get(self.REMOTE_STATE_URL, timeout=8)
             if res.status_code == 200 and res.text.strip():
-                state = json.loads(res.text)
-                logging.info("Successfully loaded persistent state from remote KV store.")
+                state = res.json()
+                logging.info("Successfully loaded persistent state from remote store.")
                 return state
         except Exception as e:
-            logging.error(f"KVDB GET failed: {e}")
+            logging.error(f"Remote state GET failed: {e}")
         return None
 
-    def _kvdb_put(self, state: dict):
-        """Write state to KVDB using PUT with raw JSON body."""
+    def _remote_put(self, state: dict):
+        """Write state to JSONBlob via PUT."""
         try:
-            data = json.dumps(state)
             requests.put(
-                self.KVDB_URL,
-                data=data,
+                self.REMOTE_STATE_URL,
+                json=state,
                 headers={"Content-Type": "application/json"},
                 timeout=8
             )
         except Exception as e:
-            logging.error(f"KVDB PUT failed: {e}")
+            logging.error(f"Remote state PUT failed: {e}")
 
     def load_state(self) -> dict:
-        # 1. Try remote KV store first (survives Render deploys & sleep)
-        remote = self._kvdb_get()
+        # 1. Try remote store first (survives Render deploys & sleep)
+        remote = self._remote_get()
         if remote:
             defaults = self._default_state()
             for k, v in defaults.items():
@@ -127,8 +126,8 @@ class SingleStrategyExecutor:
         except Exception as e:
             logging.error(f"Failed to write state to disk: {e}")
 
-        # Sync to remote KVDB (fire-and-forget in background thread)
-        threading.Thread(target=self._kvdb_put, args=(state.copy(),), daemon=True).start()
+        # Sync to remote store (fire-and-forget in background thread)
+        threading.Thread(target=self._remote_put, args=(state.copy(),), daemon=True).start()
 
     def log_trade_to_google(self, event_type: str, trade_info: dict):
         """Sends trade data in a non-blocking background thread to user's Google App Script webhook."""

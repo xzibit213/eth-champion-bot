@@ -295,13 +295,13 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
                 except:
                     pass
 
-            # If local state looks like a fresh default, try KVDB as backup
+            # If local state looks like a fresh default, try remote store as backup
             if not loaded_from_disk or state.get('total_trades', 0) == 0:
                 try:
                     import requests as req
-                    kvdb_r = req.get("https://kvdb.io/9CLhFNPcuEd8buGuo8J5Ad/state", timeout=5)
-                    if kvdb_r.status_code == 200 and kvdb_r.text.strip():
-                        remote = json.loads(kvdb_r.text)
+                    remote_r = req.get("https://jsonblob.com/api/jsonBlob/019e4ab4-ae75-7654-997d-b83abbee7f26", timeout=5)
+                    if remote_r.status_code == 200 and remote_r.text.strip():
+                        remote = remote_r.json()
                         # Only use remote if it has more data than local
                         if remote.get('total_trades', 0) >= state.get('total_trades', 0):
                             state.update(remote)
