@@ -119,7 +119,7 @@ DASHBOARD_HTML = """
         .chart-header { padding: 32px 32px 0; display: flex; justify-content: space-between; align-items: flex-start; }
         .ch-price { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; letter-spacing: -1px; }
         .ch-range { display: block; font-size: 14px; color: var(--text-3); font-weight: 500; font-family: 'Plus Jakarta Sans'; letter-spacing: 0; margin-top: 4px; }
-        .tv-wrapper { height: 600px; width: 100%; margin-top: 16px; }
+        .tv-wrapper { height: 300px; width: 100%; margin-top: 16px; }
 
         /* Stats Grid Inside Bento */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 24px; height: 100%; align-content: space-between;}
@@ -168,16 +168,24 @@ DASHBOARD_HTML = """
         .cta-btn:hover .cta-icon-wrapper { background: #fff; color: #000; transform: scale(1.05) translate(2px, -2px); }
 
         /* Trade History */
-        .history-panel { padding: 32px; max-height: 400px; display: flex; flex-direction: column; }
-        .history-content { overflow-y: auto; margin-top: 16px; padding-right: 16px;}
-        .history-content::-webkit-scrollbar { width: 4px; }
+        .history-panel { padding: 0; max-height: 400px; display: flex; flex-direction: column; }
+        .history-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .history-content { overflow-y: auto; padding: 0 12px 16px; }
+        .history-content::-webkit-scrollbar { width: 6px; }
         .history-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
         
-        .history-tbl { width: 100%; border-collapse: collapse; }
-        .history-tbl th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); padding-bottom: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .history-tbl td { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.02); font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-2); }
-        .pnl-pos { color: var(--accent-green); }
-        .pnl-neg { color: var(--accent-red); }
+        .history-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .history-tbl th {
+            text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-3); padding: 16px 12px 12px; font-weight: 700;
+            position: sticky; top: 0; background: var(--bg-core); backdrop-filter: blur(10px); z-index: 2; border-bottom: none;
+        }
+        .history-tbl td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;}
+        .history-tbl tr:hover td { background: rgba(255,255,255,0.03); }
+        .pnl-pos { color: var(--accent-green); font-weight: 800; }
+        .pnl-neg { color: var(--accent-red); font-weight: 800; }
+        .res-tp { background: rgba(52,211,153,0.15); color: var(--accent-green); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .res-sl { background: rgba(248,113,113,0.15); color: var(--accent-red); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
 
         /* ROI Slider (Minimalist) */
         .roi-panel { padding: 32px; }
@@ -202,7 +210,7 @@ DASHBOARD_HTML = """
             .bento-grid { gap: 16px; margin-bottom: 16px; }
             .app-container { padding: 24px 16px 40px; }
             .chart-header { padding: 24px 24px 0; }
-            .tv-wrapper { height: 450px; }
+            .tv-wrapper { height: 250px; }
             .pos-table th, .pos-table td { padding: 12px 8px; font-size: 14px; }
         }
     </style>
@@ -255,7 +263,14 @@ DASHBOARD_HTML = """
                                 "hide_top_toolbar": true,
                                 "hide_legend": true,
                                 "save_image": false,
-                                "studies": ["MAExp@tv-basicstudies", "Volume@tv-basicstudies"],
+                                "studies": [
+                                    { "id": "MAExp@tv-basicstudies", "inputs": { "length": 9 } },
+                                    { "id": "MAExp@tv-basicstudies", "inputs": { "length": 20 } }
+                                ],
+                                "studies_overrides": {
+                                    "moving average exponential.0.plot.color": "#60a5fa",
+                                    "moving average exponential.1.plot.color": "#f59e0b"
+                                },
                                 "container_id": "tradingview_12345"
                             }
                             );
@@ -310,7 +325,10 @@ DASHBOARD_HTML = """
             <!-- History -->
             <div class="col-span-4 double-bezel">
                 <div class="db-inner history-panel">
-                    <span class="eyebrow">Recent Trade Log</span>
+                    <div class="history-header">
+                        <span class="eyebrow" style="margin:0;">Recent Trade Log</span>
+                        <span style="font-size: 11px; color: var(--text-3); font-weight: 700;">{wins}W / {losses}L</span>
+                    </div>
                     <div class="history-content">
                         {trade_history_html}
                     </div>
@@ -396,23 +414,6 @@ DASHBOARD_HTML = """
 
             slider.addEventListener('input', updateProjections);
             updateProjections(); // Init
-            
-            // Subtle scroll reveal
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, { threshold: 0.1 });
-            
-            document.querySelectorAll('.double-bezel').forEach((el, i) => {
-                el.style.opacity = 0;
-                el.style.transform = 'translateY(20px)';
-                el.style.transition = `all 0.8s cubic-bezier(0.32, 0.72, 0, 1) ${i * 0.1}s`;
-                observer.observe(el);
-            });
         });
     </script>
 </body>
