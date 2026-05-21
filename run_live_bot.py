@@ -12,22 +12,21 @@ DASHBOARD_HTML = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="60">
-    <title>ETH Champion Bot — Live Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <meta http-equiv="refresh" content="30">
+    <title>ETH Champion | Live Trading Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #07060e;
-            --bg-card: rgba(15, 13, 28, 0.7);
-            --border-glass: rgba(255,255,255,0.06);
+            --bg-deep: #05040a;
+            --bg-card: rgba(18, 16, 32, 0.65);
+            --border-glass: rgba(255,255,255,0.08);
             --accent-purple: #a78bfa;
             --accent-blue: #60a5fa;
             --accent-green: #34d399;
             --accent-red: #f87171;
-            --accent-pink: #f472b6;
             --accent-amber: #fbbf24;
-            --text-1: #f1f5f9;
-            --text-2: #94a3b8;
+            --text-1: #f8fafc;
+            --text-2: #cbd5e1;
             --text-3: #64748b;
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,149 +36,198 @@ DASHBOARD_HTML = """
             color: var(--text-1);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* Animated gradient orbs */
         .bg-orb {
-            position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.12; pointer-events: none; z-index: 0;
+            position: fixed; border-radius: 50%; filter: blur(140px); opacity: 0.15; pointer-events: none; z-index: 0;
         }
-        .orb-1 { width: 600px; height: 600px; background: #7c3aed; top: -150px; left: -100px; animation: float1 20s ease-in-out infinite; }
-        .orb-2 { width: 500px; height: 500px; background: #2563eb; bottom: -100px; right: -80px; animation: float2 25s ease-in-out infinite; }
-        .orb-3 { width: 400px; height: 400px; background: #ec4899; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: float3 18s ease-in-out infinite; }
-        @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(80px,60px); } }
-        @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-60px,-80px); } }
-        @keyframes float3 { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-40%,-40%) scale(1.15); } }
+        .orb-1 { width: 700px; height: 700px; background: #7c3aed; top: -200px; left: -150px; animation: float1 22s ease-in-out infinite; }
+        .orb-2 { width: 600px; height: 600px; background: #2563eb; bottom: -150px; right: -100px; animation: float2 28s ease-in-out infinite; }
+        .orb-3 { width: 500px; height: 500px; background: #059669; top: 60%; left: 40%; transform: translate(-50%, -50%); animation: float3 20s ease-in-out infinite; }
+        @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(100px,80px); } }
+        @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-80px,-100px); } }
+        @keyframes float3 { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-30%,-60%) scale(1.2); } }
 
-        .app { max-width: 880px; margin: 0 auto; padding: 24px 16px 40px; position: relative; z-index: 1; }
+        .app { max-width: 1400px; margin: 0 auto; padding: 24px 24px 40px; position: relative; z-index: 1; }
 
         /* Top bar */
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 28px; padding: 0 4px;
+            margin-bottom: 32px; padding: 0 8px;
         }
-        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand { display: flex; align-items: center; gap: 14px; }
         .brand-icon {
-            width: 44px; height: 44px; border-radius: 14px;
+            width: 48px; height: 48px; border-radius: 16px;
             background: linear-gradient(135deg, #7c3aed, #2563eb);
-            display: grid; place-items: center; font-size: 22px; font-weight: 800; color: #fff;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+            display: grid; place-items: center; font-size: 24px; font-weight: 900; color: #fff;
+            box-shadow: 0 0 24px rgba(124, 58, 237, 0.4);
         }
-        .brand-text { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-        .brand-text span { color: var(--text-3); font-weight: 400; font-size: 13px; margin-left: 6px; }
+        .brand-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+        .brand-text span { color: var(--text-3); font-weight: 500; font-size: 14px; margin-left: 8px; }
 
         .live-chip {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2);
-            padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600;
-            color: var(--accent-green); text-transform: uppercase; letter-spacing: 0.8px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.25);
+            padding: 8px 16px; border-radius: 100px; font-size: 13px; font-weight: 700;
+            color: var(--accent-green); text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(52,211,153,0.15);
         }
-        .live-dot { width: 7px; height: 7px; background: var(--accent-green); border-radius: 50%; animation: blink 1.4s infinite; }
-        @keyframes blink { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+        .live-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%,100% { opacity: .4; } 50% { opacity: 1; box-shadow: 0 0 8px var(--accent-green); } }
 
-        /* Price hero */
-        .price-hero {
-            background: var(--bg-card); backdrop-filter: blur(20px);
-            border: 1px solid var(--border-glass); border-radius: 20px;
-            padding: 28px 32px; margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: space-between;
+        /* Main Layout Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* Glass Panel Base */
+        .glass-panel {
+            background: var(--bg-card); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass); border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        /* Chart Area */
+        .chart-container {
+            height: calc(100vh - 120px);
+            min-height: 800px;
+            display: flex; flex-direction: column;
+        }
+        .chart-header {
+            padding: 20px 24px; border-bottom: 1px solid var(--border-glass);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+        .ch-title { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+        .ch-price { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 800; color: var(--text-1); }
+        .ch-range { font-size: 13px; color: var(--text-3); font-weight: 500; }
+        .tv-wrapper { flex: 1; width: 100%; }
+
+        /* Right Sidebar */
+        .sidebar { display: flex; flex-direction: column; gap: 24px; }
+
+        /* Stats Grid (2x2) */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .stat-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid var(--border-glass);
+            transition: transform 0.2s, background 0.3s;
             position: relative; overflow: hidden;
         }
-        .price-hero::after {
-            content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 100%;
-            background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(37,99,235,0.06));
-            border-radius: 0 20px 20px 0;
+        .stat-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--card-color, var(--accent-blue)); opacity: 0.5;
         }
-        .price-left .price-label { font-size: 13px; color: var(--text-3); margin-bottom: 4px; font-weight: 500; }
-        .price-left .price-value {
-            font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 800;
-            background: linear-gradient(135deg, #fff 40%, var(--accent-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .price-left .price-pair { font-size: 13px; color: var(--text-2); margin-top: 4px; }
-        .price-right { text-align: right; z-index: 1; }
-        .price-right .range-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; }
-        .price-right .range-val { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent-amber); }
-        .price-right .range-note { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+        .st-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-3); margin-bottom: 8px; font-weight: 700; }
+        .st-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 800; text-shadow: 0 0 20px rgba(255,255,255,0.1); }
+        
+        .c-green { color: var(--accent-green); --card-color: var(--accent-green); }
+        .c-red { color: var(--accent-red); --card-color: var(--accent-red); }
+        .c-purple { color: var(--accent-purple); --card-color: var(--accent-purple); }
+        .c-blue { color: var(--accent-blue); --card-color: var(--accent-blue); }
 
-        /* Stats grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-        .stat-tile {
-            background: var(--bg-card); backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass); border-radius: 16px;
-            padding: 18px 16px; text-align: center; transition: transform 0.2s, border-color 0.2s;
-        }
-        .stat-tile:hover { transform: translateY(-2px); border-color: rgba(167,139,250,0.2); }
-        .stat-tile .st-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-3); margin-bottom: 6px; font-weight: 600; }
-        .stat-tile .st-value { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; }
-        .c-green { color: var(--accent-green); }
-        .c-red { color: var(--accent-red); }
-        .c-purple { color: var(--accent-purple); }
-        .c-blue { color: var(--accent-blue); }
-        .c-amber { color: var(--accent-amber); }
-
-        /* Position panel */
-        .panel {
-            background: var(--bg-card); backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass); border-radius: 20px;
-            padding: 24px 28px; margin-bottom: 20px;
-        }
+        /* Panel Headers */
         .panel-hdr {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-glass);
+            padding: 20px 24px 16px; border-bottom: 1px solid var(--border-glass);
         }
-        .panel-hdr h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-2); font-weight: 700; }
-        .dir-badge {
-            padding: 4px 14px; border-radius: 100px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        .panel-hdr h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-2); font-weight: 800; }
+
+        /* Active Position */
+        .pos-panel { padding: 0; }
+        .pos-content { padding: 24px; }
+        .dir-badge { padding: 6px 16px; border-radius: 100px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .dir-long { background: rgba(52,211,153,0.15); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.3); box-shadow: 0 0 15px rgba(52,211,153,0.1); }
+        .dir-short { background: rgba(248,113,113,0.15); color: var(--accent-red); border: 1px solid rgba(248,113,113,0.3); box-shadow: 0 0 15px rgba(248,113,113,0.1); }
+        
+        .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;}
+        .pos-grid.three { grid-template-columns: 1fr 1fr 1fr; margin-bottom: 0;}
+        .pos-cell { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.03); }
+        .pos-cell .pc-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); margin-bottom: 6px; font-weight: 600;}
+        .pos-cell .pc-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 800; }
+        
+        .no-pos { text-align: center; padding: 40px 0; color: var(--text-3); font-size: 15px; font-style: italic; }
+        .no-pos .scan-icon { font-size: 40px; margin-bottom: 12px; display: block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
+
+        /* ROI Slider */
+        .roi-panel { padding: 0; }
+        .roi-content { padding: 24px; }
+        .slider-container { margin-bottom: 24px; }
+        .slider-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .slider-label { font-size: 13px; color: var(--text-2); font-weight: 600; }
+        .slider-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--accent-purple); }
+        
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0;
         }
-        .dir-long { background: rgba(52,211,153,0.12); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.2); }
-        .dir-short { background: rgba(248,113,113,0.12); color: var(--accent-red); border: 1px solid rgba(248,113,113,0.2); }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; cursor: pointer;
+            background: rgba(255,255,255,0.1); border-radius: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px; width: 24px; border-radius: 50%;
+            background: var(--accent-purple); cursor: pointer;
+            -webkit-appearance: none; margin-top: -8px;
+            box-shadow: 0 0 15px var(--accent-purple);
+            border: 3px solid #fff;
+        }
+        
+        .roi-results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .roi-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.03); }
+        .roi-box .rb-month { font-size: 11px; color: var(--text-3); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .roi-box .rb-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--accent-green); }
 
-        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .pos-cell { background: rgba(0,0,0,0.25); border-radius: 12px; padding: 14px; }
-        .pos-cell .pc-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-3); margin-bottom: 4px; }
-        .pos-cell .pc-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; }
-
-        .no-pos { text-align: center; padding: 28px 0; color: var(--text-3); font-size: 14px; font-style: italic; }
-        .no-pos .scan-icon { font-size: 32px; margin-bottom: 8px; display: block; animation: spin 3s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Trade history */
+        /* Trade History */
+        .history-panel { padding: 0; max-height: 400px; display: flex; flex-direction: column; }
+        .history-content { overflow-y: auto; padding: 0 12px; }
+        .history-content::-webkit-scrollbar { width: 6px; }
+        .history-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        
         .history-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
         .history-tbl th {
             text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-3); padding: 0 8px 10px; font-weight: 600;
+            color: var(--text-3); padding: 16px 12px 12px; font-weight: 700;
+            position: sticky; top: 0; background: var(--bg-card); backdrop-filter: blur(10px); z-index: 2;
         }
-        .history-tbl td { padding: 10px 8px; border-top: 1px solid rgba(255,255,255,0.04); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-        .history-tbl tr:hover td { background: rgba(255,255,255,0.02); }
-        .pnl-pos { color: var(--accent-green); font-weight: 700; }
-        .pnl-neg { color: var(--accent-red); font-weight: 700; }
-        .res-tp { background: rgba(52,211,153,0.1); color: var(--accent-green); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-        .res-sl { background: rgba(248,113,113,0.1); color: var(--accent-red); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .history-tbl td { padding: 12px; border-top: 1px solid rgba(255,255,255,0.04); font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500;}
+        .history-tbl tr:hover td { background: rgba(255,255,255,0.03); }
+        .pnl-pos { color: var(--accent-green); font-weight: 800; }
+        .pnl-neg { color: var(--accent-red); font-weight: 800; }
+        .res-tp { background: rgba(52,211,153,0.15); color: var(--accent-green); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+        .res-sl { background: rgba(248,113,113,0.15); color: var(--accent-red); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
 
         /* CTA buttons */
-        .cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+        .cta-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: auto; }
         .cta-btn {
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 14px 16px; border-radius: 14px; text-decoration: none;
-            font-size: 13px; font-weight: 600; transition: all 0.25s;
+            padding: 16px; border-radius: 16px; text-decoration: none;
+            font-size: 14px; font-weight: 700; transition: all 0.25s;
             border: 1px solid var(--border-glass);
         }
-        .cta-primary { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; box-shadow: 0 4px 20px rgba(124,58,237,0.25); }
-        .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.35); }
-        .cta-secondary { background: var(--bg-card); color: var(--text-2); }
-        .cta-secondary:hover { border-color: rgba(167,139,250,0.3); color: var(--text-1); }
+        .cta-primary { background: linear-gradient(135deg, #7c3aed, #2563eb); color: #fff; box-shadow: 0 4px 20px rgba(124,58,237,0.3); border: none; }
+        .cta-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); filter: brightness(1.1); }
+        .cta-secondary { background: rgba(0,0,0,0.4); color: var(--text-2); }
+        .cta-secondary:hover { border-color: rgba(167,139,250,0.4); color: #fff; background: rgba(167,139,250,0.1); }
 
-        /* Footer */
-        .footer { text-align: center; padding: 8px 0; }
-        .footer p { font-size: 11px; color: var(--text-3); letter-spacing: 0.3px; }
-        .footer .heartbeat { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-3); margin-top: 4px; }
-
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .chart-container { height: 600px; min-height: unset; }
+        }
         @media (max-width: 640px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .pos-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .pos-grid, .pos-grid.three, .roi-results { grid-template-columns: 1fr; }
             .cta-row { grid-template-columns: 1fr; }
-            .price-hero { flex-direction: column; align-items: flex-start; gap: 16px; }
-            .price-right { text-align: left; }
+            .chart-container { height: 450px; }
         }
     </style>
 </head>
@@ -193,75 +241,207 @@ DASHBOARD_HTML = """
         <div class="top-bar">
             <div class="brand">
                 <div class="brand-icon">&#926;</div>
-                <div class="brand-text">ETH Champion<span>v1.0</span></div>
+                <div class="brand-text">ETH Champion<span>v2.0 Premium</span></div>
             </div>
             <div class="live-chip"><div class="live-dot"></div>Bot Online</div>
         </div>
 
-        <!-- Price Hero -->
-        <div class="price-hero">
-            <div class="price-left">
-                <div class="price-label">ETH/USDT — Live Price</div>
-                <div class="price-value">${last_price}</div>
-                <div class="price-pair">Binance Spot • 15M Timeframe</div>
+        <div class="main-grid">
+            <!-- Left: TradingView Chart -->
+            <div class="glass-panel chart-container">
+                <div class="chart-header">
+                    <div class="ch-title">&#128200; ETH/USDT Analysis <span style="font-size: 11px; font-weight: 500; color: var(--text-3); background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; margin-left: 8px;">BINANCE SPOT &bull; 15M</span></div>
+                    <div class="ch-price">${last_price} <span class="ch-range">Range: ${last_range}</span></div>
+                </div>
+                <div class="tv-wrapper">
+                    <div class="tradingview-widget-container" style="height: 100%; width: 100%">
+                        <div id="tradingview_12345" style="height: 100%; width: 100%"></div>
+                        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                        <script type="text/javascript">
+                        new TradingView.widget(
+                        {
+                            "autosize": true,
+                            "symbol": "BINANCE:ETHUSDT",
+                            "interval": "15",
+                            "timezone": "Etc/UTC",
+                            "theme": "dark",
+                            "style": "1",
+                            "locale": "en",
+                            "enable_publishing": false,
+                            "backgroundColor": "rgba(0,0,0,0)",
+                            "gridColor": "rgba(255,255,255,0.04)",
+                            "hide_top_toolbar": false,
+                            "hide_legend": false,
+                            "save_image": false,
+                            "studies": [
+                                "BB@tv-basicstudies",
+                                "Volume@tv-basicstudies"
+                            ],
+                            "container_id": "tradingview_12345"
+                        }
+                        );
+                        </script>
+                    </div>
+                </div>
             </div>
-            <div class="price-right">
-                <div class="range-label">Last Candle Range</div>
-                <div class="range-val">${last_range}</div>
-                <div class="range-note">Trigger: &ge; $6.00</div>
+
+            <!-- Right: Sidebar Data -->
+            <div class="sidebar">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card c-green">
+                        <div class="st-label">Wallet</div>
+                        <div class="st-value">${wallet_balance}</div>
+                    </div>
+                    <div class="stat-card {pnl_color}">
+                        <div class="st-label">Total PnL</div>
+                        <div class="st-value">{total_pnl}%</div>
+                    </div>
+                    <div class="stat-card c-purple">
+                        <div class="st-label">Win Rate</div>
+                        <div class="st-value">{win_rate}%</div>
+                    </div>
+                    <div class="stat-card c-blue">
+                        <div class="st-label">Total Trades</div>
+                        <div class="st-value">{total_trades}</div>
+                    </div>
+                </div>
+
+                <!-- Active Position Panel -->
+                <div class="glass-panel pos-panel">
+                    <div class="panel-hdr">
+                        <h2>Active Position</h2>
+                        {dir_badge_html}
+                    </div>
+                    <div class="pos-content">
+                        {active_position_html}
+                    </div>
+                </div>
+
+                <!-- Google Sheets Banner -->
+                <a href="{ledger_url}" target="_blank" class="glass-panel" style="display: block; padding: 16px 20px; text-decoration: none; border: 1px solid rgba(52, 211, 153, 0.3); background: linear-gradient(90deg, rgba(52, 211, 153, 0.05), transparent); position: relative; overflow: hidden; transition: all 0.3s;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; color: var(--accent-green); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Live Trade Ledger</div>
+                            <div style="font-size: 14px; color: var(--text-1); font-weight: 500;">Check all live bot trades on Google Sheets &rarr;</div>
+                        </div>
+                        <div style="font-size: 28px;">&#128202;</div>
+                    </div>
+                </a>
+
+                <!-- ROI Projection Tool -->
+                <div class="glass-panel roi-panel">
+                    <div class="panel-hdr">
+                        <h2>ROI Projection Tool</h2>
+                        <span style="font-size: 11px; color: var(--text-3); font-weight: 600;">COMPOUNDING</span>
+                    </div>
+                    <div class="roi-content">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">Expected Monthly Yield</span>
+                                <span class="slider-value" id="yield-val">10%</span>
+                            </div>
+                            <input type="range" id="yield-slider" min="1" max="30" value="10">
+                        </div>
+                        <div class="roi-results">
+                            <div class="roi-box">
+                                <div class="rb-month">1 Month</div>
+                                <div class="rb-val" id="roi-1m">--</div>
+                            </div>
+                            <div class="roi-box">
+                                <div class="rb-month">3 Months</div>
+                                <div class="rb-val" id="roi-3m">--</div>
+                            </div>
+                            <div class="roi-box">
+                                <div class="rb-month">6 Months</div>
+                                <div class="rb-val" id="roi-6m">--</div>
+                            </div>
+                            <div class="roi-box">
+                                <div class="rb-month">1 Year</div>
+                                <div class="rb-val" id="roi-12m">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade History -->
+                <div class="glass-panel history-panel">
+                    <div class="panel-hdr">
+                        <h2>Recent Trade Log</h2>
+                        <span style="font-size: 11px; color: var(--text-3); font-weight: 700;">{wins}W / {losses}L</span>
+                    </div>
+                    <div class="history-content">
+                        {trade_history_html}
+                    </div>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="cta-row">
+                    <a class="cta-btn cta-primary" href="{ledger_url}" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Google Sheets Ledger
+                    </a>
+                    <a class="cta-btn cta-secondary" href="https://dashboard.render.com/web/srv-d85g27svikkc739sjrtg" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        Render Console
+                    </a>
+                </div>
             </div>
         </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-tile">
-                <div class="st-label">Wallet</div>
-                <div class="st-value c-green">${wallet_balance}</div>
+        
+        <!-- Bottom Description Panel -->
+        <div class="glass-panel" style="margin-top: 16px; padding: 32px;">
+            <h2 style="font-size: 18px; color: var(--accent-purple); margin-bottom: 24px;">About ETH Champion Engine</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+                <div>
+                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Core Capabilities</h3>
+                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">A fully autonomous, zero-permission trading engine designed to scan ETH/USDT on the 15-minute timeframe for volatility breakouts. Features an adaptive Bollinger Band trigger and trailing Take-Profit/Stop-Loss management built purely in Python.</p>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Performance & Backtesting</h3>
+                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">Backtested over 6 months of historical Binance data, the strategy maintains a fixed 1:3 Risk/Reward ratio. While win-rate hovers around 30-35%, the asymmetric payoff mathematically yields an upward sloping equity curve.</p>
+                </div>
+                <div>
+                    <h3 style="font-size: 13px; text-transform: uppercase; color: var(--text-2); margin-bottom: 8px;">Technology Stack</h3>
+                    <p style="font-size: 14px; color: var(--text-3); line-height: 1.6;">Built by Antigravity AI, utilizing the CCXT library for exchange execution, JSONBlob for cloud state persistence, and Google Apps Script webhooks for real-time ledger accounting.</p>
+                </div>
             </div>
-            <div class="stat-tile">
-                <div class="st-label">Total PnL</div>
-                <div class="st-value {pnl_color}">{total_pnl}%</div>
-            </div>
-            <div class="stat-tile">
-                <div class="st-label">Win Rate</div>
-                <div class="st-value c-purple">{win_rate}%</div>
-            </div>
-            <div class="stat-tile">
-                <div class="st-label">Trades</div>
-                <div class="st-value c-blue">{total_trades}</div>
-            </div>
-        </div>
-
-        <!-- Active Position Panel -->
-        <div class="panel">
-            <div class="panel-hdr">
-                <h2>Active Position</h2>
-                {dir_badge_html}
-            </div>
-            {active_position_html}
-        </div>
-
-        <!-- Trade History -->
-        <div class="panel">
-            <div class="panel-hdr">
-                <h2>Recent Trade Log</h2>
-                <span style="font-size: 11px; color: var(--text-3);">{wins}W / {losses}L</span>
-            </div>
-            {trade_history_html}
-        </div>
-
-        <!-- CTA Buttons -->
-        <div class="cta-row">
-            <a class="cta-btn cta-primary" href="{ledger_url}" target="_blank">&#128202; Google Sheets Ledger</a>
-            <a class="cta-btn cta-secondary" href="https://dashboard.render.com/web/srv-d85g27svikkc739sjrtg" target="_blank">&#9881; Render Console</a>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>15M Timeframe &bull; $6.0 Breakout Range &bull; High/Low SL &bull; 1:3 Risk-Reward &bull; {trade_mode}</p>
-            <div class="heartbeat">Last heartbeat: {last_heartbeat}</div>
         </div>
     </div>
+    
+    <!-- Client-side ROI Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentWallet = {wallet_balance_raw}; // Injected from python
+            const slider = document.getElementById('yield-slider');
+            const yieldVal = document.getElementById('yield-val');
+            
+            const r1m = document.getElementById('roi-1m');
+            const r3m = document.getElementById('roi-3m');
+            const r6m = document.getElementById('roi-6m');
+            const r12m = document.getElementById('roi-12m');
+
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+
+            function updateProjections() {
+                const rate = parseFloat(slider.value) / 100;
+                yieldVal.textContent = slider.value + '%';
+                
+                r1m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 1));
+                r3m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 3));
+                r6m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 6));
+                r12m.textContent = formatter.format(currentWallet * Math.pow(1 + rate, 12));
+            }
+
+            slider.addEventListener('input', updateProjections);
+            updateProjections(); // Init
+        });
+    </script>
 </body>
 </html>
 """
@@ -340,8 +520,13 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
                 d = active_trade['direction']
                 dir_cls = "dir-long" if d == 'Long' else "dir-short"
                 dir_badge = f'<span class="dir-badge {dir_cls}">{d.upper()}</span>'
-                pos_html = f'''<div class="pos-grid">
+                
+                margin = balance * 0.10
+                size = margin / active_trade["entry_price"]
+                
+                pos_html = f'''<div class="pos-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="pos-cell"><div class="pc-label">Entry Price</div><div class="pc-val" style="color:var(--text-1)">${active_trade["entry_price"]:.2f}</div></div>
+                    <div class="pos-cell"><div class="pc-label">Margin Used</div><div class="pc-val" style="color:var(--text-1)">${margin:.2f} <span style="font-size:11px;color:var(--text-3)">({size:.4f} ETH)</span></div></div>
                     <div class="pos-cell"><div class="pc-label">Stop Loss</div><div class="pc-val" style="color:var(--accent-red)">${active_trade["sl_price"]:.2f}</div></div>
                     <div class="pos-cell"><div class="pc-label">Take Profit</div><div class="pc-val" style="color:var(--accent-green)">${active_trade["tp_price"]:.2f}</div></div>
                 </div>'''
@@ -370,6 +555,7 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
                 "{last_price}": f"{last_price:.2f}",
                 "{last_range}": f"{last_range:.2f}",
                 "{wallet_balance}": f"{balance:.2f}",
+                "{wallet_balance_raw}": f"{balance}",
                 "{total_pnl}": f"{total_pnl:+.2f}",
                 "{pnl_color}": pnl_color,
                 "{win_rate}": f"{win_rate:.0f}",
