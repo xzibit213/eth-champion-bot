@@ -260,8 +260,9 @@ DASHBOARD_HTML = """
                                 "enable_publishing": false,
                                 "backgroundColor": "rgba(0,0,0,0)",
                                 "gridColor": "rgba(255,255,255,0.02)",
-                                "hide_top_toolbar": true,
-                                "hide_legend": true,
+                                "hide_top_toolbar": false,
+                                "hide_side_toolbar": false,
+                                "hide_legend": false,
                                 "save_image": false,
                                 "studies": [
                                     { "id": "MAExp@tv-basicstudies", "inputs": { "length": 9 } },
