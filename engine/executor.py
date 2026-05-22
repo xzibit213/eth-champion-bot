@@ -130,29 +130,55 @@ class SingleStrategyExecutor:
         threading.Thread(target=self._remote_put, args=(state.copy(),), daemon=True).start()
 
     def log_trade_to_google(self, event_type: str, trade_info: dict):
-        """Sends trade data in a non-blocking background thread to user's Google App Script webhook."""
+        """Sends trade data to Google Apps Script webhook for single-row-per-trade logging."""
         webhook_url = os.environ.get('GOOGLE_WEBHOOK_URL') or self.state.get('google_webhook_url', '')
         if not webhook_url:
             logging.info("Google Doc/Sheet Webhook URL not set. Skipping remote logging.")
             return
-            
+        
+        now = datetime.utcnow()
+        
         payload = {
             "event": event_type,
-            "timestamp": datetime.now().isoformat(),
             "symbol": self.symbol,
             "direction": trade_info.get('direction', ''),
             "entry_price": trade_info.get('entry_price', 0.0),
             "sl_price": trade_info.get('sl_price', 0.0),
             "tp_price": trade_info.get('tp_price', 0.0),
-            "exit_price": trade_info.get('exit_price', 0.0) if event_type == 'CLOSED' else None,
-            "return_pct": trade_info.get('return_pct', 0.0) if event_type == 'CLOSED' else None,
             "current_balance": self.state['balance']
         }
+        
+        if event_type == 'OPENED':
+            payload["open_timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S') + ' UTC'
+        
+        elif event_type == 'CLOSED':
+            payload["close_timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S') + ' UTC'
+            payload["exit_price"] = trade_info.get('exit_price', 0.0)
+            payload["return_pct"] = trade_info.get('return_pct', 0.0)
+            payload["exit_reason"] = trade_info.get('exit_reason', '')
+            
+            # Calculate trade duration and candle count
+            entry_time_str = trade_info.get('entry_time', '')
+            if entry_time_str:
+                try:
+                    entry_time = datetime.fromisoformat(entry_time_str)
+                    duration_seconds = (now - entry_time).total_seconds()
+                    duration_minutes = int(duration_seconds // 60)
+                    hours = duration_minutes // 60
+                    mins = duration_minutes % 60
+                    payload["duration"] = f"{hours}h {mins}m" if hours > 0 else f"{mins}m"
+                    payload["candle_count"] = max(1, int(duration_minutes // 15))
+                except Exception:
+                    payload["duration"] = "N/A"
+                    payload["candle_count"] = 0
+            else:
+                payload["duration"] = "N/A"
+                payload["candle_count"] = 0
         
         def send_request():
             try:
                 res = requests.post(webhook_url, json=payload, timeout=10)
-                logging.info(f"Successfully logged trade to Google. Status: {res.status_code}")
+                logging.info(f"Successfully logged {event_type} trade to Google. Status: {res.status_code}")
             except Exception as e:
                 logging.error(f"Failed to log trade to Google Docs/Sheets: {e}")
                 
@@ -303,6 +329,7 @@ class SingleStrategyExecutor:
                 # Remote log closing details
                 trade['exit_price'] = exit_price
                 trade['return_pct'] = round(trade_return, 2)
+                trade['exit_reason'] = exit_reason
                 self.log_trade_to_google('CLOSED', trade)
                 
                 # Track stats for dashboard
