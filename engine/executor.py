@@ -60,7 +60,7 @@ class SingleStrategyExecutor:
             'bot_start_time': datetime.now().isoformat()
         }
 
-    REMOTE_STATE_URL = "https://jsonblob.com/api/jsonBlob/019e4ab4-ae75-7654-997d-b83abbee7f26"
+    REMOTE_STATE_URL = "https://jsonblob.com/api/jsonBlob/019e50f6-1b7c-7536-a4be-1d87d8f3d668"
 
     def _remote_get(self) -> dict | None:
         """Fetch state from JSONBlob. Returns dict or None on failure."""
