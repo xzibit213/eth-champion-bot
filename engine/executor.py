@@ -197,8 +197,8 @@ class SingleStrategyExecutor:
         minutes_to_add = 15 - (now.minute % 15)
         next_candle_time = now.replace(second=0, microsecond=0) + timedelta(minutes=minutes_to_add)
         
-        # Extra 0.3 second safety delay to ensure CCXT/Binance has closed the candle on server
-        next_candle_time += timedelta(seconds=0.3)
+        # Extra 1.5 second safety delay to ensure CCXT/Binance has closed the candle on server
+        next_candle_time += timedelta(seconds=1.5)
         
         sleep_seconds = (next_candle_time - now).total_seconds()
         
