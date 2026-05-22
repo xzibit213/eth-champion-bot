@@ -1,34 +1,72 @@
 /**
- * ETH Champion Bot — Google Apps Script Webhook
+ * ETH Champion Bot — Institutional Grade Webhook & Ledger
  * 
- * SINGLE-ROW-PER-TRADE architecture:
- *   OPENED  → Creates a new row with entry details, light orange background.
- *   CLOSED  → Finds the matching OPENED row, fills in exit details,
- *             colors the row green (TP) or red (SL).
- *
- * Sheet columns (A–N):
- *   A: #       (Trade number)
- *   B: Symbol
- *   C: Direction
- *   D: Entry Price
- *   E: SL Price
- *   F: TP Price
- *   G: Open Time
- *   H: Exit Price
- *   I: Close Time
- *   J: Duration
- *   K: Candles
- *   L: Result (TP / SL)
- *   M: Return %
- *   N: Balance After
- *
- * DEPLOYMENT:
- *   1. Open your Google Sheet → Extensions → Apps Script
- *   2. Delete any existing code and paste this entire file.
- *   3. Click Deploy → New Deployment → Web App
- *   4. Set "Execute as" = Me, "Who has access" = Anyone
- *   5. Click Deploy and copy the URL into your Render env var GOOGLE_WEBHOOK_URL
+ * DEPLOYMENT & SETUP:
+ *   1. Paste this entire file into your Google Apps Script editor.
+ *   2. Select the function 'setupInstitutionalSheet' from the top toolbar dropdown.
+ *   3. Click "Run" to instantly format your spreadsheet with premium, institutional-grade headers.
+ *   4. Click Deploy → New Deployment → Web App (Execute as Me, Access: Anyone).
  */
+
+function setupInstitutionalSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Trade Ledger");
+  if (!sheet) {
+    sheet = ss.insertSheet("Trade Ledger");
+  }
+  
+  var headers = [
+    "TRADE ID", "ASSET", "TYPE", "ENTRY", "STOP LOSS", "TAKE PROFIT", 
+    "OPEN TIME (UTC)", "EXIT PRICE", "CLOSE TIME (UTC)", "DURATION", 
+    "CANDLES", "RESULT", "NET RETURN", "RUNNING BALANCE"
+  ];
+  
+  var headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setValues([headers]);
+  
+  // Premium Institutional Styling
+  headerRange.setBackground("#0F172A"); // Slate 900
+  headerRange.setFontColor("#F8FAFC");  // Slate 50
+  headerRange.setFontWeight("bold");
+  headerRange.setFontFamily("Inter");
+  headerRange.setFontSize(11);
+  headerRange.setHorizontalAlignment("center");
+  headerRange.setVerticalAlignment("middle");
+  sheet.setRowHeight(1, 40);
+  
+  // Subtle bottom border for header
+  headerRange.setBorder(null, null, true, null, null, null, "#334155", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+  
+  sheet.setFrozenRows(1);
+  
+  // Exact column sizing for data readability
+  sheet.setColumnWidth(1, 90);   // TRADE ID
+  sheet.setColumnWidth(2, 110);  // ASSET
+  sheet.setColumnWidth(3, 90);   // TYPE
+  sheet.setColumnWidth(4, 110);  // ENTRY
+  sheet.setColumnWidth(5, 110);  // SL
+  sheet.setColumnWidth(6, 110);  // TP
+  sheet.setColumnWidth(7, 180);  // OPEN TIME
+  sheet.setColumnWidth(8, 110);  // EXIT
+  sheet.setColumnWidth(9, 180);  // CLOSE TIME
+  sheet.setColumnWidth(10, 100); // DURATION
+  sheet.setColumnWidth(11, 90);  // CANDLES
+  sheet.setColumnWidth(12, 110); // RESULT
+  sheet.setColumnWidth(13, 120); // NET RETURN
+  sheet.setColumnWidth(14, 150); // BALANCE
+  
+  // Base formatting for data rows (JetBrains Mono for numbers)
+  var fullRange = sheet.getRange(2, 1, 1000, headers.length);
+  fullRange.setFontFamily("Consolas"); // Safe monospace fallback
+  fullRange.setFontSize(10);
+  fullRange.setHorizontalAlignment("center");
+  fullRange.setVerticalAlignment("middle");
+  
+  // Number formatting for prices
+  sheet.getRange("D2:F1000").setNumberFormat("$#,##0.00");
+  sheet.getRange("H2:H1000").setNumberFormat("$#,##0.00");
+  sheet.getRange("N2:N1000").setNumberFormat("$#,##0.00");
+}
 
 function doPost(e) {
   try {
@@ -52,89 +90,51 @@ function doPost(e) {
 }
 
 function handleOpened(sheet, data) {
-  // Ensure headers exist
-  if (sheet.getLastRow() === 0) {
-    var headers = ["#", "Symbol", "Direction", "Entry Price", "SL Price", "TP Price", 
-                   "Open Time", "Exit Price", "Close Time", "Duration", "Candles", 
-                   "Result", "Return %", "Balance After"];
-    sheet.appendRow(headers);
-    var headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setBackground("#1a1a2e");
-    headerRange.setFontColor("#ffffff");
-    headerRange.setFontWeight("bold");
-    headerRange.setHorizontalAlignment("center");
-    sheet.setFrozenRows(1);
-    
-    // Set column widths
-    sheet.setColumnWidth(1, 40);   // #
-    sheet.setColumnWidth(2, 100);  // Symbol
-    sheet.setColumnWidth(3, 80);   // Direction
-    sheet.setColumnWidth(4, 100);  // Entry
-    sheet.setColumnWidth(5, 100);  // SL
-    sheet.setColumnWidth(6, 100);  // TP
-    sheet.setColumnWidth(7, 170);  // Open Time
-    sheet.setColumnWidth(8, 100);  // Exit Price
-    sheet.setColumnWidth(9, 170);  // Close Time
-    sheet.setColumnWidth(10, 80);  // Duration
-    sheet.setColumnWidth(11, 70);  // Candles
-    sheet.setColumnWidth(12, 70);  // Result
-    sheet.setColumnWidth(13, 90);  // Return %
-    sheet.setColumnWidth(14, 110); // Balance
-  }
-  
-  var tradeNum = sheet.getLastRow(); // Row count minus header = trade number
+  var tradeNum = Math.max(1, sheet.getLastRow()); 
   var newRow = [
-    tradeNum,                        // #
-    data.symbol || "ETH/USDT",       // Symbol
-    data.direction || "",            // Direction
-    data.entry_price || "",          // Entry Price
-    data.sl_price || "",             // SL Price
-    data.tp_price || "",             // TP Price
-    data.open_timestamp || "",       // Open Time
-    "—",                             // Exit Price (pending)
-    "—",                             // Close Time (pending)
-    "ACTIVE",                        // Duration (pending)
-    "—",                             // Candles (pending)
-    "ACTIVE",                        // Result (pending)
-    "—",                             // Return % (pending)
-    "$" + parseFloat(data.current_balance || 0).toFixed(2)  // Balance
+    "TRD-" + ('0000' + tradeNum).slice(-4), 
+    data.symbol || "ETH/USDT",       
+    data.direction || "",            
+    data.entry_price || "",          
+    data.sl_price || "",             
+    data.tp_price || "",             
+    data.open_timestamp || "",       
+    "—",                             
+    "—",                             
+    "ACTIVE",                        
+    "—",                             
+    "ACTIVE",                        
+    "—",                             
+    data.current_balance || 0
   ];
   
   sheet.appendRow(newRow);
   
-  // Color the entire row light orange to indicate active trade
   var rowNum = sheet.getLastRow();
   var range = sheet.getRange(rowNum, 1, 1, 14);
-  range.setBackground("#fff3e0");       // Light orange
-  range.setFontColor("#333333");
-  range.setHorizontalAlignment("center");
-  range.setFontFamily("Roboto Mono");
-  range.setFontSize(10);
+  range.setBackground("#FFFBEB");       // Very soft amber/orange
+  range.setFontColor("#451A03");        // Deep amber text
+  range.setFontWeight("normal");
   
-  // Bold the direction cell
+  // Highlight Direction
   sheet.getRange(rowNum, 3).setFontWeight("bold");
 }
 
 function handleClosed(sheet, data) {
-  // Find the last row that has "ACTIVE" in column L (Result) matching this symbol/direction
   var lastRow = sheet.getLastRow();
   var targetRow = -1;
   
-  // Search from bottom up to find the most recent ACTIVE trade
   for (var i = lastRow; i >= 2; i--) {
-    var resultCell = sheet.getRange(i, 12).getValue();
-    var symbolCell = sheet.getRange(i, 2).getValue();
-    if (resultCell === "ACTIVE" && symbolCell === (data.symbol || "ETH/USDT")) {
+    if (sheet.getRange(i, 12).getValue() === "ACTIVE") {
       targetRow = i;
       break;
     }
   }
   
   if (targetRow === -1) {
-    // No matching OPENED row found — create a standalone closed row as fallback
-    var tradeNum = lastRow;
+    var tradeNum = Math.max(1, lastRow);
     var fallbackRow = [
-      tradeNum,
+      "TRD-" + ('0000' + tradeNum).slice(-4),
       data.symbol || "ETH/USDT",
       data.direction || "",
       data.entry_price || "",
@@ -147,38 +147,33 @@ function handleClosed(sheet, data) {
       data.candle_count || 0,
       data.exit_reason || "?",
       (data.return_pct >= 0 ? "+" : "") + parseFloat(data.return_pct || 0).toFixed(2) + "%",
-      "$" + parseFloat(data.current_balance || 0).toFixed(2)
+      data.current_balance || 0
     ];
     sheet.appendRow(fallbackRow);
     targetRow = sheet.getLastRow();
   } else {
-    // Update the existing OPENED row with closing details
-    sheet.getRange(targetRow, 8).setValue(data.exit_price || "");                       // Exit Price
-    sheet.getRange(targetRow, 9).setValue(data.close_timestamp || "");                  // Close Time
-    sheet.getRange(targetRow, 10).setValue(data.duration || "N/A");                     // Duration
-    sheet.getRange(targetRow, 11).setValue(data.candle_count || 0);                     // Candles
-    sheet.getRange(targetRow, 12).setValue(data.exit_reason || "?");                    // Result
+    sheet.getRange(targetRow, 8).setValue(data.exit_price || "");
+    sheet.getRange(targetRow, 9).setValue(data.close_timestamp || "");
+    sheet.getRange(targetRow, 10).setValue(data.duration || "N/A");
+    sheet.getRange(targetRow, 11).setValue(data.candle_count || 0);
+    sheet.getRange(targetRow, 12).setValue(data.exit_reason || "?");
     var returnStr = (data.return_pct >= 0 ? "+" : "") + parseFloat(data.return_pct || 0).toFixed(2) + "%";
-    sheet.getRange(targetRow, 13).setValue(returnStr);                                  // Return %
-    sheet.getRange(targetRow, 14).setValue("$" + parseFloat(data.current_balance || 0).toFixed(2)); // Balance
+    sheet.getRange(targetRow, 13).setValue(returnStr);
+    sheet.getRange(targetRow, 14).setValue(data.current_balance || 0);
   }
   
-  // Color the row based on result
   var range = sheet.getRange(targetRow, 1, 1, 14);
   var reason = (data.exit_reason || "").toUpperCase();
   
   if (reason === "TP") {
-    range.setBackground("#e8f5e9");     // Light green
-    range.setFontColor("#1b5e20");      // Dark green text
+    range.setBackground("#F0FDF4");     // Crisp institutional green
+    range.setFontColor("#14532D");      // Dark emerald text
   } else if (reason === "SL") {
-    range.setBackground("#ffebee");     // Light red
-    range.setFontColor("#b71c1c");      // Dark red text
-  } else {
-    range.setBackground("#f5f5f5");     // Neutral gray
-    range.setFontColor("#333333");
+    range.setBackground("#FEF2F2");     // Crisp institutional red
+    range.setFontColor("#7F1D1D");      // Dark ruby text
   }
   
-  // Bold the result and return cells
-  sheet.getRange(targetRow, 12).setFontWeight("bold");
-  sheet.getRange(targetRow, 13).setFontWeight("bold");
+  // Emphasize the result columns
+  sheet.getRange(targetRow, 12).setFontWeight("bold"); // RESULT
+  sheet.getRange(targetRow, 13).setFontWeight("bold"); // NET RETURN
 }
