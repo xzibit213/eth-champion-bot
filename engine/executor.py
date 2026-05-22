@@ -156,8 +156,12 @@ class SingleStrategyExecutor:
             except Exception as e:
                 logging.error(f"Failed to log trade to Google Docs/Sheets: {e}")
                 
-        # Fire-and-forget in background thread so trading logic is never delayed
-        threading.Thread(target=send_request, daemon=True).start()
+        # OPENED must be synchronous to survive Render redeploys.
+        # CLOSED can be fire-and-forget since the bot sleeps for 15min after.
+        if event_type == 'OPENED':
+            send_request()
+        else:
+            threading.Thread(target=send_request, daemon=True).start()
 
     def sleep_until_next_candle(self):
         """Calculates precise remaining time until next 15M boundary and sleeps."""
