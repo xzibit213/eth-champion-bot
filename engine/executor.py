@@ -257,7 +257,15 @@ class SingleStrategyExecutor:
         df = self.strategy.populate_indicators(df)
         df = self.strategy.populate_signals(df, min_range=6.0)
         
-        last_closed_candle = df.iloc[-2]
+        # Dynamically find the last closed candle (prevents errors from Binance API lag)
+        now_utc = datetime.utcnow()
+        closed_candles = df[df.index + pd.Timedelta(minutes=15) <= now_utc]
+        
+        if closed_candles.empty:
+            logging.warning("No closed candles found in dataframe.")
+            return
+            
+        last_closed_candle = closed_candles.iloc[-1]
         current_price = df.iloc[-1]['close']
         
         # Persist live market data for the dashboard
