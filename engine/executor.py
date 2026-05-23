@@ -137,6 +137,7 @@ class SingleStrategyExecutor:
             return
         
         now = datetime.utcnow()
+        ist_now = now + timedelta(hours=5, minutes=30)
         
         payload = {
             "event": event_type,
@@ -149,10 +150,10 @@ class SingleStrategyExecutor:
         }
         
         if event_type == 'OPENED':
-            payload["open_timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S') + ' UTC'
+            payload["open_timestamp"] = ist_now.strftime('%Y-%m-%d %H:%M:%S') + ' IST'
         
         elif event_type == 'CLOSED':
-            payload["close_timestamp"] = now.strftime('%Y-%m-%d %H:%M:%S') + ' UTC'
+            payload["close_timestamp"] = ist_now.strftime('%Y-%m-%d %H:%M:%S') + ' IST'
             payload["exit_price"] = trade_info.get('exit_price', 0.0)
             payload["return_pct"] = trade_info.get('return_pct', 0.0)
             payload["exit_reason"] = trade_info.get('exit_reason', '')
@@ -348,8 +349,9 @@ class SingleStrategyExecutor:
                     self.state['losses'] = self.state.get('losses', 0) + 1
                 
                 # Append to trade history (keep last 20)
+                ist_now_hist = datetime.utcnow() + timedelta(hours=5, minutes=30)
                 history_entry = {
-                    'time': datetime.now().strftime('%m/%d %H:%M'),
+                    'time': ist_now_hist.strftime('%m/%d %H:%M'),
                     'dir': trade['direction'][0],
                     'entry': round(trade['entry_price'], 2),
                     'exit': round(exit_price, 2),

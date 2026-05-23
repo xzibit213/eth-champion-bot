@@ -253,7 +253,7 @@ DASHBOARD_HTML = """
                                 "autosize": true,
                                 "symbol": "BINANCE:ETHUSDT",
                                 "interval": "15",
-                                "timezone": "Etc/UTC",
+                                "timezone": "Asia/Kolkata",
                                 "theme": "dark",
                                 "style": "1",
                                 "locale": "en",
@@ -481,9 +481,11 @@ class HealthCheckHandler(SimpleHTTPRequestHandler):
             raw_hb = state.get('last_heartbeat', '')
             if raw_hb:
                 try:
-                    from datetime import datetime as dt
+                    from datetime import datetime as dt, timedelta
                     hb_dt = dt.fromisoformat(raw_hb)
-                    last_hb_str = hb_dt.strftime('%Y-%m-%d %H:%M:%S UTC')
+                    # Convert naive UTC from Render to IST (+05:30)
+                    hb_ist = hb_dt + timedelta(hours=5, minutes=30)
+                    last_hb_str = hb_ist.strftime('%Y-%m-%d %H:%M:%S IST')
                 except:
                     last_hb_str = raw_hb
             else:
